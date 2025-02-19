@@ -8,15 +8,20 @@ import java.util.UUID;
 public class MyTest {
 
     @Test
-    void testRequestid() {
-        String requestId = UUID.randomUUID().toString();
-
+    void testRequestid() throws InterruptedException {
         MyRepository repository = new MyRepository();
         MyService service = new MyService(repository);
         MyController controller = new MyController(service);
 
-        MDC.put("requestId", requestId);
-        controller.save();
-        MDC.remove("requestId");
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                String requestId = UUID.randomUUID().toString();
+                MDC.put("requestId", requestId);
+                controller.save();
+                MDC.remove("requestId");
+            }).start();
+        }
+
+        Thread.sleep(1000L);
     }
 }
